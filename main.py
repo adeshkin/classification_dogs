@@ -80,6 +80,26 @@ class Trainer:
 
         return metrics
 
+    def log_images(self):
+        self.model.eval()
+        with torch.no_grad():
+            for inputs, labels in tqdm(self.data_loaders['val']):
+                inputs = inputs.to(self.device)
+                labels = labels.to(self.device)
+
+                outputs = self.model(inputs)
+                loss = self.criterion(outputs, labels)
+                _, pred_labels = torch.max(outputs, 1)
+
+                column_names = ['image', 'gt_label', 'pred_label']
+                my_data = []
+                images = inputs.cpu().numpy()
+                for i in range(pred_labels.shape[0]):
+                    my_data.append([wandb.Image(images[0]), labels[i], pred_labels[i]])
+                val_table = wandb.Table(data=my_data, columns=column_names)
+                wandb.log({'my_val_table': val_table})
+                break
+
     def run(self):
         wandb.init(project=self.params['project_name'], config=self.params)
         os.makedirs(self.params['chkpt_dir'], exist_ok=True)
@@ -98,6 +118,7 @@ class Trainer:
                     'lr': self.optimizer.param_groups[0]["lr"]}
 
             wandb.log(logs, step=epoch)
+            self.log_images()
 
             current_acc = val_metrics['acc']
             if current_acc > best_acc:
