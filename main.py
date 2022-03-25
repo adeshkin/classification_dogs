@@ -50,7 +50,7 @@ class Trainer:
             self.optimizer.step()
 
             metrics['loss'] += loss.cpu().detach()
-            metrics['acc'] += torch.sum(pred_labels == labels.data)
+            metrics['acc'] += torch.sum(pred_labels == labels.data) / labels.shape[0]
 
         for m in metrics:
             metrics[m] = metrics[m] / len(self.data_loaders['train'])
@@ -73,7 +73,7 @@ class Trainer:
                 _, pred_labels = torch.max(outputs, 1)
 
                 metrics['loss'] += loss.cpu().detach()
-                metrics['acc'] += torch.sum(pred_labels == labels.data)
+                metrics['acc'] += torch.sum(pred_labels == labels.data) / labels.shape[0]
 
         for m in metrics:
             metrics[m] = metrics[m] / len(self.data_loaders['val'])
