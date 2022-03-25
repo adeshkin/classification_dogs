@@ -50,7 +50,7 @@ class Trainer:
             self.optimizer.step()
 
             metrics['loss'] += loss.cpu().detach()
-            metrics['acc'] += torch.sum(pred_labels == labels.data) / labels.shape[0]
+            metrics['acc'] += torch.sum(pred_labels == labels.data).cpu().detach() / labels.shape[0]
 
         for m in metrics:
             metrics[m] = metrics[m] / len(self.data_loaders['train'])
@@ -73,14 +73,14 @@ class Trainer:
                 _, pred_labels = torch.max(outputs, 1)
 
                 metrics['loss'] += loss.cpu().detach()
-                metrics['acc'] += torch.sum(pred_labels == labels.data) / labels.shape[0]
+                metrics['acc'] += torch.sum(pred_labels == labels.data).cpu() / labels.shape[0]
 
         for m in metrics:
             metrics[m] = metrics[m] / len(self.data_loaders['val'])
 
         return metrics
 
-    def log_images(self):
+    def log_images(self, epoch):
         self.model.eval()
         with torch.no_grad():
             for inputs, labels in tqdm(self.data_loaders['val']):
@@ -94,10 +94,11 @@ class Trainer:
                 column_names = ['image', 'gt_label', 'pred_label']
                 my_data = []
                 images = inputs.cpu().numpy()
+                pred_labels = pred_labels.cpu().numpy()
                 for i in range(pred_labels.shape[0]):
-                    my_data.append([wandb.Image(images[i]), labels[i], pred_labels[i]])
+                    my_data.append([wandb.Image(images[i].reshape(128, 128, 3)), labels[i], pred_labels[i]])
                 val_table = wandb.Table(data=my_data, columns=column_names)
-                wandb.log({'my_val_table': val_table})
+                wandb.log({'my_val_table': val_table}, step=epoch)
                 break
 
     def run(self):
