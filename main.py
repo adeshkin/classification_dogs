@@ -95,7 +95,7 @@ class Trainer:
                 my_data = []
                 images = inputs.cpu().numpy()
                 for i in range(pred_labels.shape[0]):
-                    my_data.append([wandb.Image(images[0]), labels[i], pred_labels[i]])
+                    my_data.append([wandb.Image(images[i]), labels[i], pred_labels[i]])
                 val_table = wandb.Table(data=my_data, columns=column_names)
                 wandb.log({'my_val_table': val_table})
                 break
