@@ -128,8 +128,8 @@ class Trainer:
                     'val': val_metrics,
                     'lr': self.optimizer.param_groups[0]["lr"]}
 
-            wandb.log(logs, step=epoch)
-            self.log_images()
+            wandb.log(logs, step=epoch+1)
+            self.log_images(epoch+1)
 
             current_acc = val_metrics['acc']
             if current_acc > best_acc:
