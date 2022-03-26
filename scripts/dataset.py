@@ -17,6 +17,7 @@ class DogDataset(Dataset):
 
     def __getitem__(self, idx):
         filepath = f'{self.img_dir}/{self.filenames[idx]}'
+        print(filepath)
         label = self.labels[idx]
 
         img = cv2.imread(filepath, cv2.IMREAD_COLOR)
