@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 
-def main(source_dir, dataset_name='imagewoof2-160', map_filename='map_clsloc.txt'):
+def prepare_data(source_dir, dataset_name='imagewoof2-160', map_filename='map_clsloc.txt'):
     data_dir = f'{source_dir}/{dataset_name}'
     map_filepath = f'{source_dir}/{map_filename}'
     splits = ['train', 'val']
@@ -25,13 +25,9 @@ def main(source_dir, dataset_name='imagewoof2-160', map_filename='map_clsloc.txt
         df = pd.DataFrame(columns=['filename', 'label'])
         for label in labels:
             label_dir = f'{data_dir}/{split}/{label}'
-            filenames = sorted([x for x in os.listdir(label_dir) if '.JPEG' in x])
+            filenames = sorted([f'{label}/{x}' for x in os.listdir(label_dir) if '.JPEG' in x])
             label_df = pd.DataFrame(filenames, columns=['filename'])
             label_df['label'] = label2id[label]
             df = pd.concat([df, label_df], ignore_index=True)
 
         df.to_csv(f'{source_dir}/{split}.csv', index=False, header=True)
-
-
-if __name__ == '__main__':
-    main(source_dir='.')
