@@ -1,7 +1,7 @@
 project_name: 'classification_dogs'
 chkpt_dir: '/content/drive/MyDrive/classification_dogs/checkpoints'
 num_epochs: 20
-data_dir: '/content/drive/MyDrive/classification_dogs/data'
+data_dir: '/content/drive/MyDrive/classification_dogs/data/imagewoof2-160'
 splits:
   - 'train'
   - 'val'
@@ -13,7 +13,7 @@ model_name: 'resnet18'
 num_classes: 10
 lr: 0.001
 momentum: 0.9
-step_size: 10
+step_size: 5
 gamma: 0.1
 
 

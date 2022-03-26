@@ -1,15 +1,14 @@
 import os
 from tqdm import tqdm
 import wandb
-import copy
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
 
 from dataset import get_dls
-from scripts.model import get_model
+from model import get_model
+from utils import MetricMonitor
 
 
 class Trainer:
@@ -30,13 +29,15 @@ class Trainer:
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    def train(self):
+    def train(self, epoch):
         self.model.train()
+        metric_monitor = MetricMonitor()
 
         metrics = dict()
         metrics['loss'] = 0.0
         metrics['acc'] = 0.0
-        for inputs, labels in tqdm(self.data_loaders['train']):
+        stream = tqdm(self.data_loaders['train'])
+        for inputs, labels in stream:
             inputs = inputs.to(self.device)
             labels = labels.to(self.device)
 
@@ -48,92 +49,71 @@ class Trainer:
             self.optimizer.step()
 
             _, pred_labels = torch.max(outputs, 1)
-
-            metrics['loss'] += loss.cpu().detach() / labels.shape[0]
-            metrics['acc'] += torch.sum(pred_labels == labels.data).cpu().detach() / labels.shape[0]
+            loss_value = loss.cpu().detach() / labels.shape[0]
+            acc_value = torch.sum(pred_labels == labels.data).cpu().detach() / labels.shape[0]
+            metrics['loss'] += loss_value
+            metrics['acc'] += acc_value
+            metric_monitor.update('loss', loss_value)
+            metric_monitor.update('accuracy', acc_value)
+            stream.set_description(
+                "Epoch: {epoch}. Validation. {metric_monitor}".format(epoch=epoch, metric_monitor=metric_monitor)
+            )
 
         for m in metrics:
             metrics[m] = metrics[m] / len(self.data_loaders['train'])
 
         return metrics
 
-    def eval(self):
+    def eval(self, epoch):
         self.model.eval()
+        metric_monitor = MetricMonitor()
 
         metrics = dict()
         metrics['loss'] = 0.0
         metrics['acc'] = 0.0
+        stream = tqdm(self.data_loaders['val'])
         with torch.no_grad():
-            for inputs, labels in tqdm(self.data_loaders['val']):
+            for inputs, labels in stream:
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
 
                 outputs = self.model(inputs)
                 loss = self.criterion(outputs, labels)
-                _, pred_labels = torch.max(outputs, 1)
 
-                metrics['loss'] += loss.cpu() / labels.shape[0]
-                metrics['acc'] += torch.sum(pred_labels == labels.data).cpu() / labels.shape[0]
+                _, pred_labels = torch.max(outputs, 1)
+                loss_value = loss.cpu().detach() / labels.shape[0]
+                acc_value = torch.sum(pred_labels == labels.data).cpu().detach() / labels.shape[0]
+                metrics['loss'] += loss_value
+                metrics['acc'] += acc_value
+                metric_monitor.update('loss', loss_value)
+                metric_monitor.update('accuracy', acc_value)
+                stream.set_description(
+                    "Epoch: {epoch}. Validation. {metric_monitor}".format(epoch=epoch, metric_monitor=metric_monitor)
+                )
 
         for m in metrics:
             metrics[m] = metrics[m] / len(self.data_loaders['val'])
 
         return metrics
 
-    def to_img(self, inp):
-        inp = inp.transpose((1, 2, 0))
-        mean = np.array([0.485, 0.456, 0.406])
-        std = np.array([0.229, 0.224, 0.225])
-        inp = std * inp + mean
-        inp = np.clip(inp, 0, 1)
-
-        return inp
-
-    def log_images(self, epoch):
-        self.model.eval()
-
-        with torch.no_grad():
-            for inputs, labels in tqdm(self.data_loaders['val']):
-                inputs = inputs.to(self.device)
-                labels = labels.to(self.device)
-
-                outputs = self.model(inputs)
-                _, pred_labels = torch.max(outputs, 1)
-
-                column_names = ['image', 'gt_label', 'pred_label']
-                my_data = []
-                inputs = inputs.cpu().numpy()
-                pred_labels = pred_labels.cpu().numpy()
-                for i in range(pred_labels.shape[0]):
-                    my_data.append([wandb.Image(self.to_img(inputs[i])), labels[i], pred_labels[i]])
-                val_table = wandb.Table(data=my_data, columns=column_names)
-                wandb.log({'my_val_table': val_table}, step=epoch)
-                break
-
     def run(self):
         wandb.init(project=self.params['project_name'], config=self.params)
         os.makedirs(self.params['chkpt_dir'], exist_ok=True)
 
-        best_model_wts = copy.deepcopy(self.model.state_dict())
         best_acc = 0.0
-
         self.model = self.model.to(self.device)
-        for epoch in range(self.params['num_epochs']):
-            train_metrics = self.train()
+        for epoch in range(1, self.params['num_epochs']+1):
+            train_metrics = self.train(epoch)
             self.lr_scheduler.step()
-            val_metrics = self.eval()
+            val_metrics = self.eval(epoch)
 
             logs = {'train': train_metrics,
                     'val': val_metrics,
                     'lr': self.optimizer.param_groups[0]["lr"]}
 
-            wandb.log(logs, step=epoch+1)
-            self.log_images(epoch+1)
+            wandb.log(logs, step=epoch)
 
             current_acc = val_metrics['acc']
             if current_acc > best_acc:
                 best_acc = current_acc
-                best_model_wts = copy.deepcopy(self.model.state_dict())
-
-        self.model.load_state_dict(best_model_wts)
-        torch.save(self.model.state_dict(), f"{self.params['chkpt_dir']}/{self.params['model_name']}.pth")
+                torch.save(self.model.state_dict(), f"{self.params['chkpt_dir']}/{self.params['model_name']}.pth")
