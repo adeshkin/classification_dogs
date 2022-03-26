@@ -1,5 +1,5 @@
 data/
-checkpoints/
+scripts/checkpoints/
 wandb/
 uploads/
 
