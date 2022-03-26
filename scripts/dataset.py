@@ -50,11 +50,12 @@ def get_transform(img_size=(160, 160)):
     return transform
 
 
-def get_ds(data_dir):
+def get_ds(source_dir, dataset_name='imagewoof2-160'):
+    data_dir = f'{source_dir}/{dataset_name}'
     ds = dict()
     transform = get_transform()
     for split in ['train', 'val']:
-        df = pd.read_csv(f'{data_dir}/{split}.csv')
+        df = pd.read_csv(f'{source_dir}/{split}.csv')
         img_dir = f'{data_dir}/{split}'
         ds[split] = DogDataset(df, img_dir, transform[split])
 

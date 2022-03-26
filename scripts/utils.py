@@ -7,8 +7,8 @@ import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 
 
-def plot_distribution(source_dir, dataset='imagewoof2-160'):
-    data_dir = f'{source_dir}/{dataset}'
+def plot_distribution(source_dir, dataset_name='imagewoof2-160'):
+    data_dir = f'{source_dir}/{dataset_name}'
     filepath = f'{source_dir}/label_info.csv'
     label_info = pd.read_csv(filepath)
     for split in ['train', 'val']:
@@ -28,10 +28,10 @@ def plot_distribution(source_dir, dataset='imagewoof2-160'):
     plt.show()
 
 
-def show_rand(source_dir, dataset='imagewoof2-160'):
+def show_rand(source_dir, dataset_name='imagewoof2-160'):
     np.random.seed(42)
 
-    data_dir = f'{source_dir}/{dataset}'
+    data_dir = f'{source_dir}/{dataset_name}'
     split = 'train'
 
     filepath = f'{source_dir}/label_info.csv'
