@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 
 def prepare_data(data_dir='/content/drive/MyDrive/classification_dogs/data/imagewoof2-160',
@@ -31,6 +32,11 @@ def prepare_data(data_dir='/content/drive/MyDrive/classification_dogs/data/image
             df = pd.concat([df, label_df], ignore_index=True)
 
         df.to_csv(f'{data_dir}/{split}.csv', index=False, header=True)
+
+    df1 = pd.read_csv(f'{data_dir}/train.csv')
+    train_df, dev_df, _, _ = train_test_split(df, df['label'], test_size=0.2, random_state=42)
+    train_df.to_csv(f'{data_dir}/train1.csv', index=False, header=True)
+    train_df.to_csv(f'{data_dir}/dev.csv', index=False, header=True)
 
 
 if __name__ == '__main__':

@@ -2,21 +2,15 @@ import os
 from flask import Flask, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
 import torch
-from scripts.model import load_model
-from scripts.dataset import prepare_img
 
-model = load_model()
+from utils import load_model, allowed_file, prepare_img, UPLOAD_FOLDER
 
-UPLOAD_FOLDER = 'data'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+model = load_model()
 
 
 @app.route('/', methods=['GET', 'POST'])
