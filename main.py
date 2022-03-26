@@ -9,8 +9,8 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
 
-from data.dataset import get_dls
-from model import get_model
+from scripts.dataset import get_dls
+from scripts.model import get_model
 
 
 class Trainer:

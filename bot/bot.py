@@ -1,11 +1,10 @@
-import sys
 import os
 import logging
 from aiogram import Bot, Dispatcher, types, executor
 import torch
 
-from model import load_model
-from data.dataset import prepare_img
+from scripts.model import load_model
+from scripts.dataset import prepare_img
 
 TOKEN = ''
 bot = Bot(token=TOKEN)
@@ -17,7 +16,7 @@ model = load_model()
 
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
-    await message.answer('Отправь фото')
+    await message.answer('Отправьте фото')
 
 
 @dp.message_handler(content_types=['photo'])

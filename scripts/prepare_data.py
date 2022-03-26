@@ -3,7 +3,7 @@ import pandas as pd
 
 
 def main():
-    data_dir = 'imagewoof2-160'
+    data_dir = '/content/drive/MyDrive/classification_dogs/data/imagewoof2-160'
     splits = ['train', 'val']
 
     labels = sorted([x for x in os.listdir(f'{data_dir}/train')
@@ -17,7 +17,7 @@ def main():
         df = pd.DataFrame(columns=['filepath', 'label'])
         for label in labels:
             label_dir = f'{data_dir}/{split}/{label}'
-            filenames = sorted([f'data/{label_dir}/{x}' for x in os.listdir(label_dir) if '.JPEG' in x])
+            filenames = sorted([f'{label_dir}/{x}' for x in os.listdir(label_dir) if '.JPEG' in x])
             label_df = pd.DataFrame(filenames, columns=['filepath'])
             label_df['label'] = label2id[label]
             df = pd.concat([df, label_df], ignore_index=True)

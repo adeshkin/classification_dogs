@@ -2,12 +2,12 @@ import os
 from flask import Flask, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
 import torch
-from model import load_model
-from data.dataset import prepare_img
+from scripts.model import load_model
+from scripts.dataset import prepare_img
 
 model = load_model()
 
-UPLOAD_FOLDER = '/Users/adyoshkin/Desktop/classification_dogs/flask/uploads'
+UPLOAD_FOLDER = 'data'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 app = Flask(__name__)
