@@ -1,53 +1,92 @@
 import os
+import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
+import albumentations as A
+from albumentations.pytorch.transforms import ToTensorV2
 
 
-def stats(data_dir):
-    for mode in ['train', 'val']:
-        labels = sorted(os.listdir(f'{data_dir}/{mode}'))
-        label2num = dict()
+def get_transform(img_size):
+    transform = dict()
+    train_transform = A.Compose([
+        A.Resize(height=img_size[0], width=img_size[1]),
+        A.RGBShift(r_shift_limit=15, g_shift_limit=15, b_shift_limit=15, p=0.5),
+        A.RandomBrightnessContrast(p=0.5),
+        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ToTensorV2(),
+    ])
+
+    val_transform = A.Compose([
+        A.Resize(height=img_size[0], width=img_size[1]),
+        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ToTensorV2(),
+    ])
+
+    transform['train'] = train_transform
+    transform['val'] = val_transform
+
+    return transform
+
+
+def plot_distribution(source_dir, dataset='imagewoof2-160'):
+    data_dir = f'{source_dir}/{dataset}'
+    filepath = f'{source_dir}/label_info.csv'
+    label_info = pd.read_csv(filepath)
+    for split in ['train', 'val']:
+        labels = sorted(os.listdir(f'{data_dir}/{split}'))
+        class2num = dict()
         for label in labels:
-            label_dir = f'{data_dir}/{mode}/{label}'
-            label2num[label] = len(os.listdir(label_dir))
+            label_dir = f'{data_dir}/{split}/{label}'
+            name = label_info['name'][label_info['label'] == label].item()
+            class2num[name] = len(os.listdir(label_dir))
+        unique, counts = list(class2num.keys()), class2num.values()
+        plt.barh(unique, counts, label=split)
 
-        unique, counts = list(label2num.keys()), label2num.values()
-        plt.barh(unique, counts)
-
-    plt.title('Class Frequency')
-    plt.xlabel('Frequency')
+    plt.title('Class Distribution')
+    plt.xlabel('# images')
     plt.ylabel('Class')
-
+    plt.legend()
     plt.show()
 
 
-def show_random(data_dir):
-    num_labels = 10
-    num_train_imgs, num_val_imgs = 3, 2
-    num_images = num_train_imgs + num_val_imgs
-    fig, axs = plt.subplots(num_labels, num_images, figsize=(20, 10))
-    fig.subplots_adjust(wspace=0)
-    labels = sorted(os.listdir(f'{data_dir}/train'))
-    for i, ax in enumerate(axs.ravel()):
-        mode_id = i % num_images
-        if mode_id < num_train_imgs:
-            mode = 'train'
-        else:
-            mode = 'val'
-        label_id = i // num_images
-        label = labels[label_id]
+def show_rand(source_dir, dataset='imagewoof2-160'):
+    np.random.seed(42)
 
-        label_dir = f'{data_dir}/{mode}/{label}'
+    data_dir = f'{source_dir}/{dataset}'
+    split = 'train'
+
+    filepath = f'{source_dir}/label_info.csv'
+    label_info = pd.read_csv(filepath)
+
+    fig, axs = plt.subplots(nrows=2, ncols=5, figsize=(16, 8))
+    labels = sorted(os.listdir(f'{data_dir}/{split}'))
+    fig.subplots_adjust(wspace=0)
+
+    for i, ax in enumerate(axs.ravel()):
+        label = labels[i]
+        label_dir = f'{data_dir}/{split}/{label}'
         filenames = sorted(os.listdir(label_dir))
 
         image_id = np.random.randint(len(filenames))
-
         image_filepath = f'{label_dir}/{filenames[image_id]}'
         img = cv2.imread(image_filepath, cv2.IMREAD_COLOR)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
+        name = label_info['name'][label_info['label'] == label].item()
+
         ax.imshow(img)
-        # ax.set_title(f'{mode} {label}')
-        # ax.set_axis_off()
-    plt.show()
+        ax.set_title(name)
+        ax.set_axis_off()
+
+
+def vis_aug(dataset):
+    np.random.seed(42)
+
+    dataset.transform = A.Compose([t for t in dataset.transform if not isinstance(t, (A.Normalize, ToTensorV2))])
+    figure, axs = plt.subplots(nrows=2, ncols=5, figsize=(16, 8))
+    for ax in axs.ravel():
+        idx = np.random.randint(len(dataset))
+        image, _ = dataset[idx]
+        ax.imshow(image)
+        ax.set_axis_off()

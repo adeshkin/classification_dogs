@@ -34,4 +34,4 @@ def main(source_dir, dataset_name='imagewoof2-160', map_filename='map_clsloc.txt
 
 
 if __name__ == '__main__':
-    main(source_dir='../data')
+    main(source_dir='.')

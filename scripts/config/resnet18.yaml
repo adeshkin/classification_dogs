@@ -5,6 +5,9 @@ data_dir: 'data/imagewoof2-160'
 splits:
   - 'train'
   - 'val'
+img_size:
+  - 160
+  - 160
 batch_size: 8
 model_name: 'resnet18'
 num_classes: 10
