@@ -36,9 +36,6 @@ class Trainer:
         self.model.train()
         metric_monitor = MetricMonitor()
 
-        metrics = dict()
-        metrics['loss'] = 0.0
-        metrics['acc'] = 0.0
         stream = tqdm(self.data_loaders['train'])
         for inputs, labels in stream:
             inputs = inputs.to(self.device)
@@ -54,26 +51,20 @@ class Trainer:
             _, pred_labels = torch.max(outputs, 1)
             loss_value = loss.cpu().detach() / labels.shape[0]
             acc_value = torch.sum(pred_labels == labels.data).cpu().detach() / labels.shape[0]
-            metrics['loss'] += loss_value
-            metrics['acc'] += acc_value
             metric_monitor.update('loss', loss_value)
             metric_monitor.update('accuracy', acc_value)
             stream.set_description(
-                "Epoch: {epoch}. Validation. {metric_monitor}".format(epoch=epoch, metric_monitor=metric_monitor)
+                "Epoch: {epoch}. Training. {metric_monitor}".format(epoch=epoch, metric_monitor=metric_monitor)
             )
 
-        for m in metrics:
-            metrics[m] = metrics[m] / len(self.data_loaders['train'])
-
+        metrics = {metric: value / len(self.data_loaders['train'])
+                   for (metric, value) in metric_monitor.get_metrics().items()}
         return metrics
 
     def eval(self, epoch):
         self.model.eval()
         metric_monitor = MetricMonitor()
 
-        metrics = dict()
-        metrics['loss'] = 0.0
-        metrics['acc'] = 0.0
         stream = tqdm(self.data_loaders['val'])
         with torch.no_grad():
             for inputs, labels in stream:
@@ -86,20 +77,18 @@ class Trainer:
                 _, pred_labels = torch.max(outputs, 1)
                 loss_value = loss.cpu().detach() / labels.shape[0]
                 acc_value = torch.sum(pred_labels == labels.data).cpu().detach() / labels.shape[0]
-                metrics['loss'] += loss_value
-                metrics['acc'] += acc_value
                 metric_monitor.update('loss', loss_value)
                 metric_monitor.update('accuracy', acc_value)
                 stream.set_description(
                     "Epoch: {epoch}. Validation. {metric_monitor}".format(epoch=epoch, metric_monitor=metric_monitor)
                 )
 
-        for m in metrics:
-            metrics[m] = metrics[m] / len(self.data_loaders['val'])
+        metrics = {metric: value / len(self.data_loaders['val'])
+                   for (metric, value) in metric_monitor.get_metrics().items()}
 
         return metrics
 
-    def run(self):
+    def run(self, config_filename):
         wandb.init(project=self.params['project_name'], config=self.params)
         os.makedirs(self.params['chkpt_dir'], exist_ok=True)
 
@@ -119,13 +108,15 @@ class Trainer:
             current_acc = val_metrics['acc']
             if current_acc > best_acc:
                 best_acc = current_acc
-                torch.save(self.model.state_dict(), f"{self.params['chkpt_dir']}/{self.params['model_name']}.pth")
+                torch.save(self.model.state_dict(), f"{self.params['chkpt_dir']}/{config_filename}_best.pth")
+            else:
+                torch.save(self.model.state_dict(), f"{self.params['chkpt_dir']}/{config_filename}_last.pth")
 
 
 if __name__ == '__main__':
-    filepath = sys.argv[1]
-    with open(filepath, 'r') as file:
+    config_filename = sys.argv[1]
+    with open(f'config/{config_filename}.yaml', 'r') as file:
         params = yaml.load(file, yaml.Loader)
 
     trainer = Trainer(params)
-    trainer.run()
+    trainer.run(config_filename)

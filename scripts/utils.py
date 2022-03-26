@@ -10,6 +10,7 @@ from collections import defaultdict
 
 class MetricMonitor:
     def __init__(self, float_precision=3):
+        self.metrics = None
         self.float_precision = float_precision
         self.reset()
 
@@ -22,6 +23,9 @@ class MetricMonitor:
         metric["val"] += val
         metric["count"] += 1
         metric["avg"] = metric["val"] / metric["count"]
+
+    def get_metrics(self):
+        return {metric_name: metric["avg"] for (metric_name, metric) in self.metrics.items()}
 
     def __str__(self):
         return " | ".join(

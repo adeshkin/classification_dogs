@@ -1,8 +1,11 @@
+import os.path
+
 import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 import cv2
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
+from sklearn.model_selection import train_test_split
 
 
 class DogDataset(Dataset):
@@ -53,11 +56,18 @@ def get_transform(img_size):
 def get_dl(data_dir, splits, img_size, batch_size):
     dl = dict()
     transform = get_transform(img_size)
+    if 'dev' in splits and not os.path.exists(f'{data_dir}/dev.csv'):
+        assert 'train1' in splits, 'Training on train1, validation on dev, test on val'
+        df = pd.read_csv(f'{data_dir}/train.csv')
+        train_df, dev_df, _, _ = train_test_split(df, df['label'], test_size=0.2, random_state=42)
+        train_df.to_csv(f'{data_dir}/train1.csv', index=False, header=True)
+        train_df.to_csv(f'{data_dir}/dev.csv', index=False, header=True)
+
     for split in splits:
         df = pd.read_csv(f'{data_dir}/{split}.csv')
         img_dir = f'{data_dir}/{split}'
         ds = DogDataset(df, img_dir, transform[split])
-        dl[split] = DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=4)
+        dl[split] = DataLoader(ds, batch_size=batch_size, shuffle=True)
 
     return dl
 
