@@ -1,6 +1,7 @@
 imagewoof2*/
 checkpoints/
 wandb/
+uploads/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
