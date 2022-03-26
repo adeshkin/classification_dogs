@@ -3,6 +3,7 @@ import os
 from tqdm import tqdm
 import wandb
 import copy
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -35,7 +36,7 @@ class Trainer:
 
         metrics = dict()
         metrics['loss'] = 0.0
-        metrics['acc'] = 0
+        metrics['acc'] = 0.0
         for inputs, labels in tqdm(self.data_loaders['train']):
             inputs = inputs.to(self.device)
             labels = labels.to(self.device)
@@ -43,13 +44,13 @@ class Trainer:
             outputs = self.model(inputs)
             loss = self.criterion(outputs, labels)
 
-            _, pred_labels = torch.max(outputs, 1)
-
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
 
-            metrics['loss'] += loss.cpu().detach()
+            _, pred_labels = torch.max(outputs, 1)
+
+            metrics['loss'] += loss.cpu().detach() / labels.shape[0]
             metrics['acc'] += torch.sum(pred_labels == labels.data).cpu().detach() / labels.shape[0]
 
         for m in metrics:
@@ -62,7 +63,7 @@ class Trainer:
 
         metrics = dict()
         metrics['loss'] = 0.0
-        metrics['acc'] = 0
+        metrics['acc'] = 0.0
         with torch.no_grad():
             for inputs, labels in tqdm(self.data_loaders['val']):
                 inputs = inputs.to(self.device)
@@ -72,7 +73,7 @@ class Trainer:
                 loss = self.criterion(outputs, labels)
                 _, pred_labels = torch.max(outputs, 1)
 
-                metrics['loss'] += loss.cpu().detach()
+                metrics['loss'] += loss.cpu() / labels.shape[0]
                 metrics['acc'] += torch.sum(pred_labels == labels.data).cpu() / labels.shape[0]
 
         for m in metrics:
@@ -80,15 +81,24 @@ class Trainer:
 
         return metrics
 
+    def to_img(self, inp):
+        inp = inp.transpose((1, 2, 0))
+        mean = np.array([0.485, 0.456, 0.406])
+        std = np.array([0.229, 0.224, 0.225])
+        inp = std * inp + mean
+        inp = np.clip(inp, 0, 1)
+
+        return inp
+
     def log_images(self, epoch):
         self.model.eval()
+
         with torch.no_grad():
             for inputs, labels in tqdm(self.data_loaders['val']):
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
 
                 outputs = self.model(inputs)
-                loss = self.criterion(outputs, labels)
                 _, pred_labels = torch.max(outputs, 1)
 
                 column_names = ['image', 'gt_label', 'pred_label']
@@ -96,7 +106,7 @@ class Trainer:
                 images = inputs.cpu().numpy()
                 pred_labels = pred_labels.cpu().numpy()
                 for i in range(pred_labels.shape[0]):
-                    my_data.append([wandb.Image(images[i].reshape(128, 128, 3)), labels[i], pred_labels[i]])
+                    my_data.append([wandb.Image(self.to_img(images[i])), labels[i], pred_labels[i]])
                 val_table = wandb.Table(data=my_data, columns=column_names)
                 wandb.log({'my_val_table': val_table}, step=epoch)
                 break
