@@ -57,9 +57,7 @@ class Trainer:
                 "Epoch: {epoch}. Training. {metric_monitor}".format(epoch=epoch, metric_monitor=metric_monitor)
             )
 
-        metrics = {metric: value / len(self.data_loaders['train'])
-                   for (metric, value) in metric_monitor.get_metrics().items()}
-        return metrics
+        return metric_monitor.get_metrics()
 
     def eval(self, epoch):
         self.model.eval()
@@ -83,10 +81,7 @@ class Trainer:
                     "Epoch: {epoch}. Validation. {metric_monitor}".format(epoch=epoch, metric_monitor=metric_monitor)
                 )
 
-        metrics = {metric: value / len(self.data_loaders['val'])
-                   for (metric, value) in metric_monitor.get_metrics().items()}
-
-        return metrics
+        return metric_monitor.get_metrics()
 
     def run(self, config_filename):
         wandb.init(project=self.params['project_name'], config=self.params)

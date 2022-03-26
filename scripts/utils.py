@@ -1,11 +1,23 @@
 import os
-import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 from collections import defaultdict
+
+LABEL2ID_NAME = {
+    'n02086240': (0, 'Shih-Tzu'),
+    'n02087394': (1, 'Rhodesian_ridgeback'),
+    'n02088364': (2, 'beagle'),
+    'n02089973': (3, 'English_foxhound'),
+    'n02093754': (4, 'Border_terrier'),
+    'n02096294': (5, 'Australian_terrier'),
+    'n02099601': (6, 'golden_retriever'),
+    'n02105641': (7, 'Old_English_sheepdog'),
+    'n02111889': (8, 'Samoyed'),
+    'n02115641': (9, 'dingo')
+}
 
 
 class MetricMonitor:
@@ -38,17 +50,14 @@ class MetricMonitor:
         )
 
 
-def plot_distribution(source_dir, dataset_name='imagewoof2-160'):
-    data_dir = f'{source_dir}/{dataset_name}'
-    filepath = f'{source_dir}/label_info.csv'
-    label_info = pd.read_csv(filepath)
+def plot_distribution(data_dir):
     for split in ['train', 'val']:
-        labels = sorted(os.listdir(f'{data_dir}/{split}'))
+        labels = sorted(LABEL2ID_NAME.keys())
         class2num = dict()
         for label in labels:
             label_dir = f'{data_dir}/{split}/{label}'
-            name = label_info['name'][label_info['label'] == label].item()
-            class2num[name] = len(os.listdir(label_dir))
+            name = LABEL2ID_NAME[label][1]
+            class2num[name] = len([x for x in os.listdir(label_dir) if '.JPEG' in x])
         unique, counts = list(class2num.keys()), class2num.values()
         plt.barh(unique, counts, label=split)
 
@@ -59,30 +68,24 @@ def plot_distribution(source_dir, dataset_name='imagewoof2-160'):
     plt.show()
 
 
-def show_rand_img(source_dir, dataset_name='imagewoof2-160', seed=42):
+def show_rand_img(data_dir, split='train', seed=42):
     np.random.seed(seed)
 
-    data_dir = f'{source_dir}/{dataset_name}'
-    split = 'train'
-
-    filepath = f'{source_dir}/label_info.csv'
-    label_info = pd.read_csv(filepath)
-
     fig, axs = plt.subplots(nrows=2, ncols=5, figsize=(16, 8))
-    labels = sorted(os.listdir(f'{data_dir}/{split}'))
+    labels = sorted(LABEL2ID_NAME.keys())
     fig.subplots_adjust(wspace=0)
 
     for i, ax in enumerate(axs.ravel()):
         label = labels[i]
         label_dir = f'{data_dir}/{split}/{label}'
-        filenames = sorted(os.listdir(label_dir))
+        filenames = sorted([x for x in os.listdir(label_dir) if '.JPEG' in x])
 
         image_id = np.random.randint(len(filenames))
         image_filepath = f'{label_dir}/{filenames[image_id]}'
         img = cv2.imread(image_filepath, cv2.IMREAD_COLOR)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-        name = label_info['name'][label_info['label'] == label].item()
+        name = LABEL2ID_NAME[label][1]
 
         ax.imshow(img)
         ax.set_title(name)

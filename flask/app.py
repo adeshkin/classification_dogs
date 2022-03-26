@@ -3,12 +3,11 @@ from flask import Flask, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
 import torch
 
-from utils import load_model, allowed_file, prepare_img, UPLOAD_FOLDER
+from utils import load_model, allowed_file, prepare_img, UPLOAD_FOLDER, ID2NAME
 
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
 
 model = load_model()
 
@@ -48,7 +47,11 @@ def predict(filename):
 
     output = model(img)
     _, pred_label = torch.max(output, 1)
-    return f'Predicted label = {pred_label.numpy()[0]}'
+    idx = pred_label.numpy()[0]
+    name = ID2NAME[idx]
+    # prob = torch.softmax(output, dim=1)[0, idx].item()
+
+    return name
 
 
 if __name__ == "__main__":

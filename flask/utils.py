@@ -10,6 +10,22 @@ UPLOAD_FOLDER = 'data'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 
+LABEL2ID_NAME = {
+    'n02086240': (0, 'Shih-Tzu'),
+    'n02087394': (1, 'Rhodesian_ridgeback'),
+    'n02088364': (2, 'beagle'),
+    'n02089973': (3, 'English_foxhound'),
+    'n02093754': (4, 'Border_terrier'),
+    'n02096294': (5, 'Australian_terrier'),
+    'n02099601': (6, 'golden_retriever'),
+    'n02105641': (7, 'Old_English_sheepdog'),
+    'n02111889': (8, 'Samoyed'),
+    'n02115641': (9, 'dingo')
+}
+
+ID2NAME = {idx: name for idx, name in LABEL2ID_NAME.values()}
+
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
