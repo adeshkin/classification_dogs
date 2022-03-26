@@ -100,9 +100,10 @@ class Trainer:
 
             wandb.log(logs, step=epoch)
 
-            current_acc = val_metrics['acc']
+            current_acc = val_metrics['accuracy']
             if current_acc > best_acc:
                 best_acc = current_acc
+                print(f'Saved best model with val_accuracy = {round(current_acc, 3)}')
                 torch.save(self.model.state_dict(), f"{self.params['chkpt_dir']}/{config_filename}_best.pth")
             else:
                 torch.save(self.model.state_dict(), f"{self.params['chkpt_dir']}/{config_filename}_last.pth")
