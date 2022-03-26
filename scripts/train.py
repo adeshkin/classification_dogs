@@ -1,4 +1,6 @@
 import os
+import sys
+import yaml
 from tqdm import tqdm
 import wandb
 import torch
@@ -117,3 +119,12 @@ class Trainer:
             if current_acc > best_acc:
                 best_acc = current_acc
                 torch.save(self.model.state_dict(), f"{self.params['chkpt_dir']}/{self.params['model_name']}.pth")
+
+
+if __name__ == '__main__':
+    filepath = sys.argv[1]
+    with open(filepath, 'r') as file:
+        params = yaml.load(file, yaml.Loader)
+
+    trainer = Trainer(params)
+    trainer.run()
