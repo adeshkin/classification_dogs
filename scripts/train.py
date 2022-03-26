@@ -51,8 +51,8 @@ class Trainer:
             _, pred_labels = torch.max(outputs, 1)
             loss_value = loss.cpu().detach() / labels.shape[0]
             acc_value = torch.sum(pred_labels == labels.data).cpu().detach() / labels.shape[0]
-            metric_monitor.update('loss', loss_value)
-            metric_monitor.update('accuracy', acc_value)
+            metric_monitor.update('loss', loss_value.item())
+            metric_monitor.update('accuracy', acc_value.item())
             stream.set_description(
                 "Epoch: {epoch}. Training. {metric_monitor}".format(epoch=epoch, metric_monitor=metric_monitor)
             )
@@ -75,8 +75,8 @@ class Trainer:
                 _, pred_labels = torch.max(outputs, 1)
                 loss_value = loss.cpu().detach() / labels.shape[0]
                 acc_value = torch.sum(pred_labels == labels.data).cpu().detach() / labels.shape[0]
-                metric_monitor.update('loss', loss_value)
-                metric_monitor.update('accuracy', acc_value)
+                metric_monitor.update('loss', loss_value.item())
+                metric_monitor.update('accuracy', acc_value.item())
                 stream.set_description(
                     "Epoch: {epoch}. Validation. {metric_monitor}".format(epoch=epoch, metric_monitor=metric_monitor)
                 )
