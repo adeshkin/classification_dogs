@@ -50,9 +50,9 @@ def get_transform(img_size):
     return transform
 
 
-def get_dl(data_dir, splits, image_size, batch_size):
+def get_dl(data_dir, splits, img_size, batch_size):
     dl = dict()
-    transform = get_transform(image_size)
+    transform = get_transform(img_size)
     for split in splits:
         df = pd.read_csv(f'{data_dir}/{split}.csv')
         img_dir = f'{data_dir}/{split}'
@@ -62,9 +62,9 @@ def get_dl(data_dir, splits, image_size, batch_size):
     return dl
 
 
-def get_ds(data_dir, image_size=(160, 160)):
+def get_ds(data_dir, img_size=(160, 160)):
     ds = dict()
-    transform = get_transform(image_size)
+    transform = get_transform(img_size)
     for split in ['train', 'val']:
         df = pd.read_csv(f'{data_dir}/{split}.csv')
         img_dir = f'{data_dir}/{split}'

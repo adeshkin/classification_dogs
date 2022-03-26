@@ -18,7 +18,7 @@ class Trainer:
         self.params = params
         self.data_loaders = get_dl(params['data_dir'],
                                    params['splits'],
-                                   params['image_size'],
+                                   params['img_size'],
                                    params['batch_size'])
         self.model = get_model(params['model_name'],
                                params['num_classes'])
