@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
 
-from dataset import get_dls
+from dataset import get_dl
 from model import get_model
 from utils import MetricMonitor
 
@@ -16,9 +16,10 @@ from utils import MetricMonitor
 class Trainer:
     def __init__(self, params):
         self.params = params
-        self.data_loaders = get_dls(params['data_dir'],
-                                    params['splits'],
-                                    params['batch_size'])
+        self.data_loaders = get_dl(params['data_dir'],
+                                   params['splits'],
+                                   params['image_size'],
+                                   params['batch_size'])
         self.model = get_model(params['model_name'],
                                params['num_classes'])
         self.criterion = nn.CrossEntropyLoss()

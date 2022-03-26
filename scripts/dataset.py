@@ -28,7 +28,7 @@ class DogDataset(Dataset):
         return image, label
 
 
-def get_transform(img_size=(160, 160)):
+def get_transform(img_size):
     transform = dict()
     train_transform = A.Compose([
         A.Resize(height=img_size[0], width=img_size[1]),
@@ -50,25 +50,23 @@ def get_transform(img_size=(160, 160)):
     return transform
 
 
-def get_dls(data_dir, splits, batch_size):
-    dls = dict()
-    transform = get_transform()
+def get_dl(data_dir, splits, image_size, batch_size):
+    dl = dict()
+    transform = get_transform(image_size)
     for split in splits:
         df = pd.read_csv(f'{data_dir}/{split}.csv')
         img_dir = f'{data_dir}/{split}'
         ds = DogDataset(df, img_dir, transform[split])
-        dl = DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=batch_size)
-        dls[split] = dl
+        dl[split] = DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=4)
 
-    return dls
+    return dl
 
 
-def get_ds(source_dir, dataset_name='imagewoof2-160'):
-    data_dir = f'{source_dir}/{dataset_name}'
+def get_ds(data_dir, image_size=(160, 160)):
     ds = dict()
-    transform = get_transform()
+    transform = get_transform(image_size)
     for split in ['train', 'val']:
-        df = pd.read_csv(f'{source_dir}/{split}.csv')
+        df = pd.read_csv(f'{data_dir}/{split}.csv')
         img_dir = f'{data_dir}/{split}'
         ds[split] = DogDataset(df, img_dir, transform[split])
 
