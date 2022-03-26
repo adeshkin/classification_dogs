@@ -1,4 +1,3 @@
-import yaml
 import os
 from tqdm import tqdm
 import wandb
@@ -9,7 +8,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
 
-from scripts.dataset import get_dls
+from dataset import get_dls
 from scripts.model import get_model
 
 
@@ -138,11 +137,3 @@ class Trainer:
 
         self.model.load_state_dict(best_model_wts)
         torch.save(self.model.state_dict(), f"{self.params['chkpt_dir']}/{self.params['model_name']}.pth")
-
-
-if __name__ == '__main__':
-    with open(f'config/resnet18.yaml', 'r') as file:
-        params = yaml.load(file, yaml.Loader)
-
-    trainer = Trainer(params)
-    trainer.run()

@@ -28,8 +28,8 @@ def plot_distribution(source_dir, dataset_name='imagewoof2-160'):
     plt.show()
 
 
-def show_rand(source_dir, dataset_name='imagewoof2-160'):
-    np.random.seed(42)
+def show_rand_img(source_dir, dataset_name='imagewoof2-160', seed=42):
+    np.random.seed(seed)
 
     data_dir = f'{source_dir}/{dataset_name}'
     split = 'train'
@@ -58,11 +58,11 @@ def show_rand(source_dir, dataset_name='imagewoof2-160'):
         ax.set_axis_off()
 
 
-def vis_aug(dataset):
-    np.random.seed(42)
+def vis_aug(dataset, seed=42):
+    np.random.seed(seed)
 
     dataset.transform = A.Compose([t for t in dataset.transform if not isinstance(t, (A.Normalize, ToTensorV2))])
-    figure, axs = plt.subplots(nrows=2, ncols=5, figsize=(16, 8))
+    fig, axs = plt.subplots(nrows=2, ncols=5, figsize=(16, 8))
     for ax in axs.ravel():
         idx = np.random.randint(len(dataset))
         image, _ = dataset[idx]

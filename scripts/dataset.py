@@ -50,6 +50,19 @@ def get_transform(img_size=(160, 160)):
     return transform
 
 
+def get_dls(data_dir, splits, batch_size):
+    dls = dict()
+    transform = get_transform()
+    for split in splits:
+        df = pd.read_csv(f'{data_dir}/{split}.csv')
+        img_dir = f'{data_dir}/{split}'
+        ds = DogDataset(df, img_dir, transform[split])
+        dl = DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=batch_size)
+        dls[split] = dl
+
+    return dls
+
+
 def get_ds(source_dir, dataset_name='imagewoof2-160'):
     data_dir = f'{source_dir}/{dataset_name}'
     ds = dict()
@@ -62,14 +75,4 @@ def get_ds(source_dir, dataset_name='imagewoof2-160'):
     return ds
 
 
-def get_dls(data_dir, splits, batch_size):
-    dls = dict()
-    transform = get_transform()
-    for split in splits:
-        df = pd.read_csv(f'{data_dir}/{split}.csv')
-        img_dir = f'{data_dir}/{split}'
-        ds = DogDataset(df, img_dir, transform[split])
-        dl = DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=batch_size)
-        dls[split] = dl
 
-    return dls
