@@ -7,28 +7,6 @@ import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 
 
-def get_transform(img_size):
-    transform = dict()
-    train_transform = A.Compose([
-        A.Resize(height=img_size[0], width=img_size[1]),
-        A.RGBShift(r_shift_limit=15, g_shift_limit=15, b_shift_limit=15, p=0.5),
-        A.RandomBrightnessContrast(p=0.5),
-        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
-        ToTensorV2(),
-    ])
-
-    val_transform = A.Compose([
-        A.Resize(height=img_size[0], width=img_size[1]),
-        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
-        ToTensorV2(),
-    ])
-
-    transform['train'] = train_transform
-    transform['val'] = val_transform
-
-    return transform
-
-
 def plot_distribution(source_dir, dataset='imagewoof2-160'):
     data_dir = f'{source_dir}/{dataset}'
     filepath = f'{source_dir}/label_info.csv'

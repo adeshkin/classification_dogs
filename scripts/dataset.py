@@ -1,7 +1,8 @@
 import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 import cv2
-from utils import get_transform
+import albumentations as A
+from albumentations.pytorch.transforms import ToTensorV2
 
 
 class DogDataset(Dataset):
@@ -27,12 +28,46 @@ class DogDataset(Dataset):
         return image, label
 
 
+def get_transform(img_size=(160, 160)):
+    transform = dict()
+    train_transform = A.Compose([
+        A.Resize(height=img_size[0], width=img_size[1]),
+        A.RGBShift(r_shift_limit=15, g_shift_limit=15, b_shift_limit=15, p=0.5),
+        A.RandomBrightnessContrast(p=0.5),
+        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ToTensorV2(),
+    ])
+
+    val_transform = A.Compose([
+        A.Resize(height=img_size[0], width=img_size[1]),
+        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ToTensorV2(),
+    ])
+
+    transform['train'] = train_transform
+    transform['val'] = val_transform
+
+    return transform
+
+
+def get_ds(data_dir):
+    ds = dict()
+    transform = get_transform()
+    for split in ['train', 'val']:
+        df = pd.read_csv(f'{data_dir}/{split}.csv')
+        img_dir = f'{data_dir}/{split}'
+        ds[split] = DogDataset(df, img_dir, transform[split])
+
+    return ds
+
+
 def get_dls(data_dir, splits, batch_size):
     dls = dict()
     transform = get_transform()
     for split in splits:
         df = pd.read_csv(f'{data_dir}/{split}.csv')
-        ds = DogDataset(df, transform[split])
+        img_dir = f'{data_dir}/{split}'
+        ds = DogDataset(df, img_dir, transform[split])
         dl = DataLoader(ds, batch_size=batch_size, shuffle=True, num_workers=batch_size)
         dls[split] = dl
 

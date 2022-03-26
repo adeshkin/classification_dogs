@@ -5,6 +5,5 @@ opencv-python
 albumentations==0.4.6
 tqdm
 wandb
-jupyter
 
 
