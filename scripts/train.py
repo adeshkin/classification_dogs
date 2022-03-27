@@ -89,6 +89,11 @@ class Trainer:
         gt = []
         pred = []
         print()
+        gt = [1, 0, 1, 1, 0]
+        pred = [1, 1, 0, 1, 1]
+        print()
+        conf_mtrx = confusion_matrix(gt, pred, labels=['one', 'two'])
+        plot_conf_mtrx(conf_mtrx, ['one', 'two'])
         with torch.no_grad():
             for inputs, labels in stream:
                 inputs = inputs.to(self.device)
