@@ -7,16 +7,15 @@ class MyNet(nn.Module):
         super(MyNet, self).__init__()
         self.layers = []
         for i, out_ch in enumerate(out_chs):
-            if i == 0:
-                in_ch = in_ch
-            else:
+            if i != 0:
                 in_ch = out_chs[i-1]
 
-            self.layers[i] = nn.Sequential(
+            layer = nn.Sequential(
                 nn.Conv2d(in_ch, out_chs[i], kernel_size=3, stride=1, padding=1),
                 nn.ReLU(),
                 nn.MaxPool2d(kernel_size=2, stride=2)
             )
+            self.layers.append(layer)
 
         self.fc = nn.Linear(7 * 7, num_classes)
 
