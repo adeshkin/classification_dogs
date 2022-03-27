@@ -44,7 +44,7 @@ python3 train.py /path/to/config
   * [Imagewoof](https://github.com/fastai/imagenette#imagewoof)
 > Imagewoof is a subset of 10 classes from Imagenet that aren't so easy to classify, since they're all dog breeds. The breeds are: Australian terrier, Border terrier, Samoyed, Beagle, Shih-Tzu, English foxhound, Rhodesian ridgeback, Dingo, Golden retriever, Old English sheepdog. 
 
-<img height="250" src="data/examples/classes.png" width="500"/>
 
+![](data/examples/classes.png)
 ### Experimental results:
 ....
