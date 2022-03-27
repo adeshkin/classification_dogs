@@ -106,8 +106,8 @@ class Trainer:
                 )
 
         # Confusion matrix
-        conf_mtrx = confusion_matrix(gt, pred)
-        plot_conf_mtrx(conf_mtrx, list(ID2NAME.keys()))
+        conf_mtrx = confusion_matrix(gt, pred, labels=list(ID2NAME.values()))
+        plot_conf_mtrx(conf_mtrx, list(ID2NAME.values()))
 
         # Overall accuracy
         overall_accuracy = metric_monitor.get_metrics()['accuracy']
