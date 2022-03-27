@@ -1,10 +1,9 @@
-import cv2
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 import torch
 import torchvision
 import torch.nn as nn
-import numpy as np
+
 
 UPLOAD_FOLDER = 'data'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -49,7 +48,7 @@ def get_model(model_name, num_classes):
 
 def load_model(model_name='resnet18',
                num_classes=10,
-               model_chkpt='checkpoint/resnet18.pth'):
+               model_chkpt='resnet18_best.pth'):
 
     model = get_model(model_name, num_classes)
     model.load_state_dict(torch.load(model_chkpt, map_location=torch.device('cpu')))
@@ -58,16 +57,6 @@ def load_model(model_name='resnet18',
     return model
 
 
-def predict(img):
-    img = prepare_img(np.array(img))
-    output = model(img)
-    _, pred_label = torch.max(output, 1)
-    idx = pred_label.numpy()[0]
-    name = ID2NAME[idx]
-    # prob = torch.softmax(output, dim=1)[0, idx].item()
 
-    return name
-
-#model = load_model()
 
 
