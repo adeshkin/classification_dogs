@@ -4,7 +4,7 @@ from aiogram import Bot, Dispatcher, types, executor
 import torch
 
 from scripts.model import load_model
-from scripts.dataset import prepare_img
+
 
 TOKEN = ''
 bot = Bot(token=TOKEN)
