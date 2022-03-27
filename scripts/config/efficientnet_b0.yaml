@@ -5,7 +5,7 @@ data_dir: '/content/drive/MyDrive/classification_dogs/data/imagewoof2-160'
 img_size:
   - 160
   - 160
-batch_size: 16
+batch_size: 32
 model_name: 'efficientnet_b0'
 num_classes: 10
 lr: 0.001
