@@ -62,12 +62,17 @@ def get_dl(data_dir, img_size, batch_size):
         if 'train' in split:
             transform = transforms['train']
             shuffle = True
-        if split == 'dev':
+            img_dir = f'{data_dir}/train'
+        elif split == 'dev':
             transform = transforms['val']
             shuffle = False
+            img_dir = f'{data_dir}/train'
+        else:
+            transform = transforms['val']
+            shuffle = False
+            img_dir = f'{data_dir}/val'
 
         df = pd.read_csv(f'{data_dir}/{split}.csv')
-        img_dir = f'{data_dir}/{split}'
         ds = DogDataset(df, img_dir, transform)
         dl[split] = DataLoader(ds, batch_size=batch_size, shuffle=shuffle)
 
