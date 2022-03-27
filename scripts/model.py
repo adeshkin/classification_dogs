@@ -20,13 +20,12 @@ class MyNet(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2))
 
-        self.fc = nn.Linear(7 * 7 * 32, num_classes)
+        self.fc = nn.Linear(18 * 18 * 32, num_classes)
 
     def forward(self, x):
         out = self.layer1(x)
         out = self.layer2(out)
         out = self.layer3(out)
-        print(out.shape)
         out = out.reshape(out.size(0), -1)
         out = self.fc(out)
         return out

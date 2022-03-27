@@ -9,11 +9,11 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
 from sklearn.metrics import confusion_matrix
-from utils import ID2NAME
 
+sys.path.append('classification_dogs/scripts')
 from dataset import get_dl
 from model import get_model
-from utils import MetricMonitor, set_seed
+from utils import MetricMonitor, set_seed, ID2NAME, plot_conf_mtrx
 
 
 class Trainer:
@@ -105,25 +105,21 @@ class Trainer:
                     "Test. {metric_monitor}".format(metric_monitor=metric_monitor)
                 )
 
+        # Confusion matrix
+        conf_mtrx = confusion_matrix(gt, pred)
+        plot_conf_mtrx(conf_mtrx, list(ID2NAME.keys()))
+
         # Overall accuracy
         overall_accuracy = metric_monitor.get_metrics()['accuracy']
-        print(f'\nOverall accuracy on the val set: {round(overall_accuracy, 3)}\n')
-
-        # Confusion matrix
-        conf_mat = confusion_matrix(gt, pred)
-        print('Confusion Matrix')
-        print('-' * 16)
-        for idx, row in enumerate(conf_mat):
-            name = ID2NAME[idx]
-            print(f"{name.ljust(20)} | {row}")
+        print(f'\nOverall accuracy on the val set: {round(overall_accuracy, 3)*100}%\n')
 
         # Per-class accuracy
-        class_accuracy = 100 * conf_mat.diagonal() / conf_mat.sum(1)
+        class_accuracy = 100 * conf_mtrx.diagonal() / conf_mtrx.sum(1)
         print('\nPer class accuracy:')
         print('-' * 18)
         for idx, accuracy in enumerate(class_accuracy):
             name = ID2NAME[idx]
-            print(f"{name.ljust(20)} | {accuracy}")
+            print(f"{name.ljust(20)} | {accuracy}%")
 
     def run(self, config_filename):
         wandb.init(project=self.params['project_name'], config=self.params)
@@ -132,7 +128,8 @@ class Trainer:
         best_model_wts = copy.deepcopy(self.model.state_dict())
         best_acc = 0.0
         self.model = self.model.to(self.device)
-        for epoch in range(1, self.params['num_epochs']+1):
+        self.test()
+        for epoch in range(1, self.params['num_epochs'] + 1):
             train_metrics = self.train(epoch)
             self.lr_scheduler.step()
             dev_metrics = self.eval(epoch)
