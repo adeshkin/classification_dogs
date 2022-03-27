@@ -6,6 +6,7 @@ import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 from collections import defaultdict
 
+
 LABEL2ID_NAME = {
     'n02086240': (0, 'Shih-Tzu'),
     'n02087394': (1, 'Rhodesian_ridgeback'),
@@ -50,7 +51,7 @@ class MetricMonitor:
         )
 
 
-def plot_distribution(data_dir):
+def plot_class_dist(data_dir):
     for split in ['train', 'val']:
         labels = sorted(LABEL2ID_NAME.keys())
         class2num = dict()
@@ -61,11 +62,51 @@ def plot_distribution(data_dir):
         unique, counts = list(class2num.keys()), class2num.values()
         plt.barh(unique, counts, label=split)
 
-    plt.title('Class Distribution')
+    plt.title('Distribution of classes')
     plt.xlabel('# images')
-    plt.ylabel('Class')
+    plt.ylabel('class')
     plt.legend()
+    plt.tight_layout()
     plt.show()
+
+
+def plot_size_dist(data_dir):
+    height = dict()
+    width = dict()
+    labels = sorted(LABEL2ID_NAME.keys())
+    for split in ['train', 'val']:
+        height[split] = []
+        width[split] = []
+        for label in labels:
+            label_dir = f'{data_dir}/{split}/{label}'
+            filenames = sorted([x for x in os.listdir(label_dir) if '.JPEG' in x])
+            for filename in filenames:
+                image_filepath = f'{label_dir}/{filename}'
+                img = cv2.imread(image_filepath, cv2.IMREAD_COLOR)
+                h, w, c = img.shape
+                height[split].append(h)
+                width[split].append(w)
+
+    min_h = min(min(height['train']), min(height['val']))
+    max_h = max(max(height['train']), max(height['val']))
+    print(f'height = [{min_h}, {max_h}]')
+    min_w = min(min(width['train']), min(width['val']))
+    max_w = max(max(width['train']), max(width['val']))
+    print(f'width = [{min_w}, {max_w}]')
+
+    fig, axs = plt.subplots(2, figsize=(16, 8))
+    for split in ['train', 'val']:
+        axs[0].hist(height[split], bins=50, label=split)
+        axs[0].set_title('Distribution of height')
+        axs[0].legend()
+        axs[0].set_ylabel('# images')
+        axs[0].set_xlabel('height')
+        axs[1].hist(width[split], bins=50, label=split)
+        axs[1].set_title('Distribution of width')
+        axs[1].legend()
+        axs[1].set_ylabel('# images')
+        axs[1].set_xlabel('width')
+    fig.tight_layout()
 
 
 def show_rand_img(data_dir, split='train', seed=42):
@@ -74,7 +115,6 @@ def show_rand_img(data_dir, split='train', seed=42):
     fig, axs = plt.subplots(nrows=2, ncols=5, figsize=(16, 8))
     labels = sorted(LABEL2ID_NAME.keys())
     fig.subplots_adjust(wspace=0)
-
     for i, ax in enumerate(axs.ravel()):
         label = labels[i]
         label_dir = f'{data_dir}/{split}/{label}'
@@ -90,9 +130,10 @@ def show_rand_img(data_dir, split='train', seed=42):
         ax.imshow(img)
         ax.set_title(name)
         ax.set_axis_off()
+    fig.tight_layout()
 
 
-def vis_aug(dataset, seed=42):
+def show_aug_img(dataset, seed=42):
     np.random.seed(seed)
 
     dataset.transform = A.Compose([t for t in dataset.transform if not isinstance(t, (A.Normalize, ToTensorV2))])
@@ -102,3 +143,4 @@ def vis_aug(dataset, seed=42):
         image, _ = dataset[idx]
         ax.imshow(image)
         ax.set_axis_off()
+    fig.tight_layout()
