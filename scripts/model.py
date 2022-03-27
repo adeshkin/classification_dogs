@@ -24,8 +24,8 @@ class MyNet(nn.Module):
 
     def forward(self, x):
         out = self.layer1(x)
-        out = self.layer2(x)
-        out = self.layer3(x)
+        out = self.layer2(out)
+        out = self.layer3(out)
         print(out.shape)
         out = out.reshape(out.size(0), -1)
         out = self.fc(out)
