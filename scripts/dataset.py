@@ -32,9 +32,9 @@ def get_transforms(img_size):
     transforms = dict()
     train_transform = A.Compose([
         A.Resize(height=img_size[0], width=img_size[1]),
-        A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.05, rotate_limit=15, p=0.5),
+        A.ShiftScaleRotate(shift_limit=0.05, scale_limit=0.05, rotate_limit=30, p=0.5),
         A.HorizontalFlip(p=0.5),
-        A.CoarseDropout(max_holes=3, min_height=10, max_height=60, min_width=10, max_width=60, p=0.5),
+        A.CoarseDropout(max_holes=2, min_height=10, max_height=60, min_width=10, max_width=60, p=0.5),
         A.GaussNoise(var_limit=(10, 50), p=0.5),
         A.RGBShift(r_shift_limit=15, g_shift_limit=15, b_shift_limit=15, p=0.5),
         A.RandomBrightnessContrast(p=0.5),

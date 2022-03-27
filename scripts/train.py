@@ -105,8 +105,8 @@ class Trainer:
                     "Test {metric_monitor}".format(metric_monitor=metric_monitor)
                 )
 
-        plot_conf_mtrx(gt, pred, target_names=list(ID2NAME.values()))
         print(classification_report(gt, pred, target_names=list(ID2NAME.values())))
+        plot_conf_mtrx(gt, pred, target_names=list(ID2NAME.values()))
 
     def run(self, config_filename):
         wandb.init(project=self.params['project_name'], config=self.params)
@@ -115,7 +115,6 @@ class Trainer:
         best_model_wts = copy.deepcopy(self.model.state_dict())
         best_acc = 0.0
         self.model = self.model.to(self.device)
-        self.test()
         for epoch in range(1, self.params['num_epochs'] + 1):
             train_metrics = self.train(epoch)
             self.lr_scheduler.step()
