@@ -4,7 +4,7 @@ from albumentations.pytorch.transforms import ToTensorV2
 import torch
 import torchvision
 import torch.nn as nn
-
+import numpy as np
 
 UPLOAD_FOLDER = 'data'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -30,9 +30,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def prepare_img(filepath, img_size=(160, 160)):
-    img = cv2.imread(filepath, cv2.IMREAD_COLOR)
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+def prepare_img(img, img_size=(160, 160)):
     transform = A.Compose([
         A.Resize(height=img_size[0], width=img_size[1]),
         A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
@@ -60,6 +58,16 @@ def load_model(model_name='resnet18',
     return model
 
 
+def predict(img):
+    img = prepare_img(np.array(img))
+    output = model(img)
+    _, pred_label = torch.max(output, 1)
+    idx = pred_label.numpy()[0]
+    name = ID2NAME[idx]
+    # prob = torch.softmax(output, dim=1)[0, idx].item()
 
+    return name
+
+#model = load_model()
 
 

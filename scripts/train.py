@@ -1,6 +1,7 @@
 import os
 import sys
 import yaml
+import copy
 from tqdm import tqdm
 import wandb
 import torch
@@ -87,6 +88,7 @@ class Trainer:
         stream = tqdm(self.data_loaders['val'])
         gt = []
         pred = []
+        print()
         with torch.no_grad():
             for inputs, labels in stream:
                 inputs = inputs.to(self.device)
@@ -105,26 +107,29 @@ class Trainer:
 
         # Overall accuracy
         overall_accuracy = metric_monitor.get_metrics()['accuracy']
-        print(f'Accuracy of the network on the val set: {round(overall_accuracy, 3)}')
+        print(f'\nOverall accuracy on the val set: {round(overall_accuracy, 3)}\n')
 
         # Confusion matrix
         conf_mat = confusion_matrix(gt, pred)
         print('Confusion Matrix')
         print('-' * 16)
-        print(conf_mat, '\n')
+        for idx, row in enumerate(conf_mat):
+            name = ID2NAME[idx]
+            print(f"{name.ljust(20)} | {row}")
 
         # Per-class accuracy
         class_accuracy = 100 * conf_mat.diagonal() / conf_mat.sum(1)
-        print('Per class accuracy')
+        print('\nPer class accuracy:')
         print('-' * 18)
         for idx, accuracy in enumerate(class_accuracy):
-            class_name = ID2NAME[idx]
-            print('Accuracy of class %8s : %0.2f %%' % (class_name, accuracy))
+            name = ID2NAME[idx]
+            print(f"{name.ljust(20)} | {accuracy}")
 
     def run(self, config_filename):
         wandb.init(project=self.params['project_name'], config=self.params)
         os.makedirs(self.params['chkpt_dir'], exist_ok=True)
         set_seed()
+        best_model_wts = copy.deepcopy(self.model.state_dict())
         best_acc = 0.0
         self.model = self.model.to(self.device)
         for epoch in range(1, self.params['num_epochs']+1):
@@ -141,10 +146,14 @@ class Trainer:
             current_acc = val_metrics['accuracy']
             if current_acc > best_acc:
                 best_acc = current_acc
+                best_model_wts = copy.deepcopy(self.model.state_dict())
                 print(f'\nSaved best model with val_accuracy = {round(current_acc, 3)}\n')
-                torch.save(self.model.state_dict(), f"{self.params['chkpt_dir']}/{config_filename}_best.pth")
+                torch.save(best_model_wts, f"{self.params['chkpt_dir']}/{config_filename}_best.pth")
             else:
-                torch.save(self.model.state_dict(), f"{self.params['chkpt_dir']}/{config_filename}_last.pth")
+                torch.save(best_model_wts, f"{self.params['chkpt_dir']}/{config_filename}_last.pth")
+
+        self.model.load_state_dict(best_model_wts)
+        self.test()
 
 
 if __name__ == '__main__':

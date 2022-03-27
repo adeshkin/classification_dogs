@@ -1,34 +1,28 @@
-import os
-from flask import Flask, flash, request, redirect, url_for
-from werkzeug.utils import secure_filename
-import torch
+from flask import Flask, request, redirect, url_for
+from PIL import Image
 
-from utils import load_model, allowed_file, prepare_img, UPLOAD_FOLDER, ID2NAME
+from utils import allowed_file, predict
 
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-model = load_model()
 
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
-        # check if the post request has the file part
         if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
+            return redirect(url_for('upload_file'))
+
         file = request.files['file']
-        # If the user does not select a file, the browser submits an
-        # empty file without a filename.
         if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
+            return redirect(url_for('upload_file'))
+
         if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('predict', filename=filename))
+            img = Image.open(file.stream)
+            label_name = predict(img)
+
+            return redirect(url_for('upload_file'))
+
     return '''
     <!doctype html>
     <title>Upload new File</title>
@@ -40,19 +34,5 @@ def upload_file():
     '''
 
 
-@app.route('/predict/<filename>')
-def predict(filename):
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    img = prepare_img(filepath)
-
-    output = model(img)
-    _, pred_label = torch.max(output, 1)
-    idx = pred_label.numpy()[0]
-    name = ID2NAME[idx]
-    # prob = torch.softmax(output, dim=1)[0, idx].item()
-
-    return name
-
-
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    app.run()
