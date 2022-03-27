@@ -1,5 +1,6 @@
 Flask
 torch
 torchvision
-albumentations==0.4.6
 pillow
+numpy
+

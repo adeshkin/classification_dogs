@@ -1,27 +1,36 @@
 from flask import Flask, request, redirect, url_for
-from PIL import Image
-import numpy as np
 import torch
-from utils import allowed_file, load_model, prepare_img, ID2NAME
+from PIL import Image
+
+from utils import load_model, prepare_img, ID2NAME
 
 app = Flask(__name__)
 
 model = load_model()
 
-
-def predict(img):
-    img = prepare_img(np.array(img))
-    output = model(img)
-    _, pred_label = torch.max(output, 1)
-    idx = pred_label.numpy()[0]
-    name = ID2NAME[idx]
-
-    return name
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 
-@app.route('/result/<name>')
-def show_result(name):
-    return name
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def predict_label(img):
+    img = prepare_img(img)
+    with torch.no_grad():
+        output = model(img)[0]
+    probs = torch.softmax(output, dim=0)
+    top3_labels = []
+    top3_probs = []
+    for label_id in torch.topk(probs, 3).indices.numpy():
+        top3_labels.append(ID2NAME[label_id])
+        top3_probs.append(probs[label_id].item())
+    return top3_labels, top3_probs
+
+
+@app.route('/predict/<result>')
+def predict(result):
+    return result
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -36,9 +45,15 @@ def upload_file():
 
         if file and allowed_file(file.filename):
             img = Image.open(file.stream)
-            label_name = predict(img)
-            print(label_name)
-            return redirect(url_for('show_result', name=label_name))
+            top3_labels, top3_probs = predict_label(img)
+            result = dict()
+            for i, (label, prob) in enumerate(zip(top3_labels, top3_probs)):
+                if i != 0 and prob < 0.02:
+                    break
+                prob = int(prob * 100)
+                result[label] = f'{prob}%'
+
+            return redirect(url_for('predict', result=result))
 
     return '''
     <!doctype html>
@@ -52,4 +67,4 @@ def upload_file():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host='0.0.0.0', port=5001)

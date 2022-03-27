@@ -1,6 +1,6 @@
 import torchvision
 import torch.nn as nn
-import torch
+
 
 class MyNet(nn.Module):
     def __init__(self, num_classes, in_ch=3, out_chs=[8, 16, 32, 64, 128, 256]):
