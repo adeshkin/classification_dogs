@@ -1,9 +1,9 @@
 import torchvision
 import torch.nn as nn
-
+import torch
 
 class MyNet(nn.Module):
-    def __init__(self, num_classes, in_ch=3, out_chs=[8, 16, 32, 64, 128]):
+    def __init__(self, num_classes, in_ch=3, out_chs=[8, 16, 32, 64, 128, 256]):
         super(MyNet, self).__init__()
         self.layers = []
         for i, out_ch in enumerate(out_chs):
@@ -17,7 +17,7 @@ class MyNet(nn.Module):
             )
             self.layers.append(layer)
 
-        self.fc = nn.Linear(18 * 18 * 32, num_classes)
+        self.fc = nn.Linear(4 * 4 * 256, num_classes)
 
     def forward(self, x):
         out = x
