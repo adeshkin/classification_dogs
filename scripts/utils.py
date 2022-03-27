@@ -1,7 +1,9 @@
 import os
+import random
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
+import torch
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 from collections import defaultdict
@@ -106,12 +108,12 @@ def plot_size_dist(data_dir):
         axs[1].legend()
         axs[1].set_ylabel('# images')
         axs[1].set_xlabel('width')
-    fig.tight_layout()
+
+    plt.tight_layout()
+    plt.show()
 
 
-def show_rand_img(data_dir, split='train', seed=42):
-    np.random.seed(seed)
-
+def show_rand_img(data_dir, split='train'):
     fig, axs = plt.subplots(nrows=2, ncols=5, figsize=(16, 8))
     labels = sorted(LABEL2ID_NAME.keys())
     fig.subplots_adjust(wspace=0)
@@ -130,17 +132,27 @@ def show_rand_img(data_dir, split='train', seed=42):
         ax.imshow(img)
         ax.set_title(name)
         ax.set_axis_off()
-    fig.tight_layout()
+
+    plt.tight_layout()
+    plt.show()
 
 
-def show_aug_img(dataset, seed=42):
-    np.random.seed(seed)
-
+def show_aug_img(dataset):
     dataset.transform = A.Compose([t for t in dataset.transform if not isinstance(t, (A.Normalize, ToTensorV2))])
     fig, axs = plt.subplots(nrows=2, ncols=5, figsize=(16, 8))
+    idx = np.random.randint(len(dataset))
     for ax in axs.ravel():
-        idx = np.random.randint(len(dataset))
         image, _ = dataset[idx]
         ax.imshow(image)
         ax.set_axis_off()
-    fig.tight_layout()
+
+    plt.tight_layout()
+    plt.show()
+
+
+def set_seed(seed=42):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True

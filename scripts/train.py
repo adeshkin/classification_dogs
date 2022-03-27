@@ -10,7 +10,7 @@ from torch.optim import lr_scheduler
 
 from dataset import get_dl
 from model import get_model
-from utils import MetricMonitor
+from utils import MetricMonitor, set_seed
 
 
 class Trainer:
@@ -86,7 +86,7 @@ class Trainer:
     def run(self, config_filename):
         wandb.init(project=self.params['project_name'], config=self.params)
         os.makedirs(self.params['chkpt_dir'], exist_ok=True)
-
+        set_seed()
         best_acc = 0.0
         self.model = self.model.to(self.device)
         for epoch in range(1, self.params['num_epochs']+1):
