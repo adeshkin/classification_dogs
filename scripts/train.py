@@ -115,6 +115,7 @@ class Trainer:
         best_model_wts = copy.deepcopy(self.model.state_dict())
         best_acc = 0.0
         self.model = self.model.to(self.device)
+        patience = 5
         for epoch in range(1, self.params['num_epochs'] + 1):
             train_metrics = self.train(epoch)
             self.lr_scheduler.step()
@@ -128,12 +129,17 @@ class Trainer:
 
             current_acc = dev_metrics['accuracy']
             if current_acc > best_acc:
+                patience = 5
                 best_acc = current_acc
                 best_model_wts = copy.deepcopy(self.model.state_dict())
                 print(f'\nSaved best model with val_accuracy = {round(current_acc, 3)}\n')
                 torch.save(best_model_wts, f"{self.params['chkpt_dir']}/{config_filename}_best.pth")
             else:
                 torch.save(best_model_wts, f"{self.params['chkpt_dir']}/{config_filename}_last.pth")
+
+            patience -= 1
+            if patience == 0:
+                break
 
         self.model.load_state_dict(best_model_wts)
         self.test()
