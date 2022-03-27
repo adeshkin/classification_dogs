@@ -13,7 +13,7 @@ class MyNet(nn.Module):
                 in_ch = out_chs[i-1]
 
             self.layers[i] = nn.Sequential(
-                nn.Conv2d(in_ch, out_ch[i], kernel_size=3, stride=1, padding=1),
+                nn.Conv2d(in_ch, out_chs[i], kernel_size=3, stride=1, padding=1),
                 nn.ReLU(),
                 nn.MaxPool2d(kernel_size=2, stride=2)
             )
