@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
 
 sys.path.append('classification_dogs/scripts')
 from dataset import get_dl
@@ -89,11 +89,6 @@ class Trainer:
         gt = []
         pred = []
         print()
-        gt = [1, 0, 1, 1, 0]
-        pred = [1, 1, 0, 1, 1]
-        print()
-        conf_mtrx = confusion_matrix(gt, pred, labels=['one', 'two'])
-        plot_conf_mtrx(conf_mtrx, ['one', 'two'])
         with torch.no_grad():
             for inputs, labels in stream:
                 inputs = inputs.to(self.device)
@@ -110,21 +105,8 @@ class Trainer:
                     "Test {metric_monitor}".format(metric_monitor=metric_monitor)
                 )
 
-        # Confusion matrix
-        conf_mtrx = confusion_matrix(gt, pred, labels=list(ID2NAME.values()))
-        plot_conf_mtrx(conf_mtrx, list(ID2NAME.values()))
-
-        # Overall accuracy
-        overall_accuracy = metric_monitor.get_metrics()['accuracy']
-        print(f'\nOverall accuracy on the val set: {round(overall_accuracy, 3)*100}%\n')
-
-        # Per-class accuracy
-        class_accuracy = 100 * conf_mtrx.diagonal() / conf_mtrx.sum(1)
-        print('\nPer class accuracy:')
-        print('-' * 18)
-        for idx, accuracy in enumerate(class_accuracy):
-            name = ID2NAME[idx]
-            print(f"{name.ljust(20)} | {accuracy}%")
+        plot_conf_mtrx(gt, pred, target_names=list(ID2NAME.values()))
+        print(classification_report(gt, pred, target_names=list(ID2NAME.values())))
 
     def run(self, config_filename):
         wandb.init(project=self.params['project_name'], config=self.params)

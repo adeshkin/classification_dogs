@@ -7,7 +7,7 @@ import torch
 import albumentations as A
 from albumentations.pytorch.transforms import ToTensorV2
 from collections import defaultdict
-from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 
 LABEL2ID_NAME = {
     'n02086240': (0, 'Shih-Tzu'),
@@ -55,10 +55,11 @@ class MetricMonitor:
         )
 
 
-def plot_conf_mtrx(conf_mtrx, classes):
+def plot_conf_mtrx(gt, pred, target_names):
     fig = plt.figure(figsize=(10, 10))
     ax = fig.add_subplot(1, 1, 1)
-    cm = ConfusionMatrixDisplay(conf_mtrx, classes)
+    cm = confusion_matrix(gt, pred)
+    cm = ConfusionMatrixDisplay(cm, display_labels=target_names)
     cm.plot(values_format='d', cmap='Blues', ax=ax)
     plt.xticks(rotation=20)
 
