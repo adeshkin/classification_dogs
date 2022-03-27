@@ -1,10 +1,7 @@
 project_name: 'classification_dogs'
 chkpt_dir: '/content/drive/MyDrive/classification_dogs/checkpoints'
-num_epochs: 30
+num_epochs: 1
 data_dir: '/content/drive/MyDrive/classification_dogs/data/imagewoof2-160'
-splits:
-  - 'train'
-  - 'val'
 img_size:
   - 160
   - 160

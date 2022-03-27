@@ -31,7 +31,7 @@ class MyNet(nn.Module):
 
 
 def get_model(model_name, num_classes):
-    if model_name in ['resnet18', 'resnet34', 'efficientnet_b0']:
+    if model_name in ['resnet18', 'efficientnet_b0']:
         model = torchvision.models.__dict__[model_name](pretrained=True)
         if 'resnet' in model_name:
             model.fc = nn.Linear(model.fc.in_features, num_classes)

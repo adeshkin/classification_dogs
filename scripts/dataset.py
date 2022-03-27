@@ -54,12 +54,10 @@ def get_transforms(img_size):
     return transforms
 
 
-def get_dl(data_dir, splits, img_size, batch_size):
+def get_dl(data_dir, img_size, batch_size):
     dl = dict()
     transforms = get_transforms(img_size)
-    if 'dev' in splits:
-        assert 'train1' in splits, 'Training on train1, validation on dev, test on val'
-
+    splits = ['train1', 'dev', 'val']
     for split in splits:
         if 'train' in split:
             transform = transforms['train']

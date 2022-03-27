@@ -7,6 +7,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.optim import lr_scheduler
+from sklearn.metrics import confusion_matrix
+from utils import ID2NAME
 
 from dataset import get_dl
 from model import get_model
@@ -17,7 +19,6 @@ class Trainer:
     def __init__(self, params):
         self.params = params
         self.data_loaders = get_dl(params['data_dir'],
-                                   params['splits'],
                                    params['img_size'],
                                    params['batch_size'])
         self.model = get_model(params['model_name'],
@@ -29,14 +30,12 @@ class Trainer:
         self.lr_scheduler = lr_scheduler.StepLR(self.optimizer,
                                                 step_size=params['step_size'],
                                                 gamma=params['gamma'])
-
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     def train(self, epoch):
         self.model.train()
         metric_monitor = MetricMonitor()
-
-        stream = tqdm(self.data_loaders['train'])
+        stream = tqdm(self.data_loaders['train1'])
         for inputs, labels in stream:
             inputs = inputs.to(self.device)
             labels = labels.to(self.device)
@@ -62,8 +61,7 @@ class Trainer:
     def eval(self, epoch):
         self.model.eval()
         metric_monitor = MetricMonitor()
-
-        stream = tqdm(self.data_loaders['val'])
+        stream = tqdm(self.data_loaders['dev'])
         with torch.no_grad():
             for inputs, labels in stream:
                 inputs = inputs.to(self.device)
@@ -73,8 +71,8 @@ class Trainer:
                 loss = self.criterion(outputs, labels)
 
                 _, pred_labels = torch.max(outputs, 1)
-                loss_value = loss.cpu().detach() / labels.shape[0]
-                acc_value = torch.sum(pred_labels == labels.data).cpu().detach() / labels.shape[0]
+                loss_value = loss.cpu() / labels.shape[0]
+                acc_value = torch.sum(pred_labels == labels.data).cpu() / labels.shape[0]
                 metric_monitor.update('loss', loss_value.item())
                 metric_monitor.update('accuracy', acc_value.item())
                 stream.set_description(
@@ -82,6 +80,46 @@ class Trainer:
                 )
 
         return metric_monitor.get_metrics()
+
+    def test(self):
+        self.model.eval()
+        metric_monitor = MetricMonitor()
+        stream = tqdm(self.data_loaders['val'])
+        gt = []
+        pred = []
+        with torch.no_grad():
+            for inputs, labels in stream:
+                inputs = inputs.to(self.device)
+                labels = labels.to(self.device)
+                outputs = self.model(inputs)
+
+                _, pred_labels = torch.max(outputs, 1)
+                gt.extend(labels.cpu().numpy().tolist())
+                pred.extend(pred_labels.cpu().numpy().tolist())
+
+                acc_value = torch.sum(pred_labels == labels.data).cpu() / labels.shape[0]
+                metric_monitor.update('accuracy', acc_value.item())
+                stream.set_description(
+                    "Test. {metric_monitor}".format(metric_monitor=metric_monitor)
+                )
+
+        # Overall accuracy
+        overall_accuracy = metric_monitor.get_metrics()['accuracy']
+        print(f'Accuracy of the network on the val set: {round(overall_accuracy, 3)}')
+
+        # Confusion matrix
+        conf_mat = confusion_matrix(gt, pred)
+        print('Confusion Matrix')
+        print('-' * 16)
+        print(conf_mat, '\n')
+
+        # Per-class accuracy
+        class_accuracy = 100 * conf_mat.diagonal() / conf_mat.sum(1)
+        print('Per class accuracy')
+        print('-' * 18)
+        for idx, accuracy in enumerate(class_accuracy):
+            class_name = ID2NAME[idx]
+            print('Accuracy of class %8s : %0.2f %%' % (class_name, accuracy))
 
     def run(self, config_filename):
         wandb.init(project=self.params['project_name'], config=self.params)
