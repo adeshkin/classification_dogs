@@ -135,15 +135,15 @@ class Trainer:
         for epoch in range(1, self.params['num_epochs']+1):
             train_metrics = self.train(epoch)
             self.lr_scheduler.step()
-            val_metrics = self.eval(epoch)
+            dev_metrics = self.eval(epoch)
 
-            logs = {'train': train_metrics,
-                    'val': val_metrics,
+            logs = {'train1': train_metrics,
+                    'dev': dev_metrics,
                     'lr': self.optimizer.param_groups[0]["lr"]}
 
             wandb.log(logs, step=epoch)
 
-            current_acc = val_metrics['accuracy']
+            current_acc = dev_metrics['accuracy']
             if current_acc > best_acc:
                 best_acc = current_acc
                 best_model_wts = copy.deepcopy(self.model.state_dict())

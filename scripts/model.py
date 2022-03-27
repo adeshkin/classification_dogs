@@ -3,26 +3,29 @@ import torch.nn as nn
 
 
 class MyNet(nn.Module):
-    def __init__(self, num_classes, in_ch=3, out_chs=[8, 16, 32, 64]):
+    def __init__(self, num_classes):
         super(MyNet, self).__init__()
-        self.layers = []
-        for i, out_ch in enumerate(out_chs):
-            if i != 0:
-                in_ch = out_chs[i-1]
-
-            layer = nn.Sequential(
-                nn.Conv2d(in_ch, out_chs[i], kernel_size=3, stride=1, padding=1),
+        self.layer1 = nn.Sequential(
+                nn.Conv2d(3, 8, kernel_size=3, stride=1),
                 nn.ReLU(),
-                nn.MaxPool2d(kernel_size=2, stride=2)
-            )
-            self.layers.append(layer)
+                nn.MaxPool2d(kernel_size=2, stride=2))
 
-        self.fc = nn.Linear(7 * 7, num_classes)
+        self.layer2 = nn.Sequential(
+            nn.Conv2d(8, 16, kernel_size=3, stride=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2))
+
+        self.layer3 = nn.Sequential(
+            nn.Conv2d(16, 32, kernel_size=3, stride=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2))
+
+        self.fc = nn.Linear(7 * 7 * 32, num_classes)
 
     def forward(self, x):
-        for i in range(len(self.layers)):
-            out = self.layers[i](x)
-
+        out = self.layer1(x)
+        out = self.layer2(x)
+        out = self.layer3(x)
         print(out.shape)
         out = out.reshape(out.size(0), -1)
         out = self.fc(out)
