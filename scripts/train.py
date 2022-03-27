@@ -108,7 +108,7 @@ class Trainer:
         print(classification_report(gt, pred, target_names=list(ID2NAME.values())))
         plot_conf_mtrx(gt, pred, target_names=list(ID2NAME.values()))
 
-    def run(self, config_filename):
+    def run(self, config_name):
         wandb.init(project=self.params['project_name'], config=self.params)
         os.makedirs(self.params['chkpt_dir'], exist_ok=True)
         set_seed()
@@ -133,9 +133,9 @@ class Trainer:
                 best_acc = current_acc
                 best_model_wts = copy.deepcopy(self.model.state_dict())
                 print(f'\nSaved best model with val_accuracy = {round(current_acc, 3)}\n')
-                torch.save(best_model_wts, f"{self.params['chkpt_dir']}/{config_filename}_best.pth")
+                torch.save(best_model_wts, f"{self.params['chkpt_dir']}/{config_name}_best.pth")
             else:
-                torch.save(best_model_wts, f"{self.params['chkpt_dir']}/{config_filename}_last.pth")
+                torch.save(best_model_wts, f"{self.params['chkpt_dir']}/{config_name}_last.pth")
 
             patience -= 1
             if patience == 0:
@@ -146,9 +146,9 @@ class Trainer:
 
 
 if __name__ == '__main__':
-    config_filename = sys.argv[1]
-    with open(f'config/{config_filename}.yaml', 'r') as file:
-        params = yaml.load(file, yaml.Loader)
-
+    filepath = sys.argv[1]
+    with open(filepath, 'r') as f:
+        params = yaml.load(f, yaml.Loader)
+    config_name = filepath.split('/')[-1].split('.')[0]
     trainer = Trainer(params)
-    trainer.run(config_filename)
+    trainer.run(config_name)
