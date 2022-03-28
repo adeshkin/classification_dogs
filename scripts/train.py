@@ -116,6 +116,7 @@ class Trainer:
         best_acc = 0.0
         self.model = self.model.to(self.device)
         patience = self.params['patience']
+        self.test()
         for epoch in range(1, self.params['num_epochs'] + 1):
             train_metrics = self.train(epoch)
             self.lr_scheduler.step()
