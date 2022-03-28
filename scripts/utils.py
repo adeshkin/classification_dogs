@@ -61,7 +61,7 @@ def plot_conf_mtrx(gt, pred, target_names):
     cm = confusion_matrix(gt, pred)
     cm = ConfusionMatrixDisplay(cm, display_labels=target_names)
     cm.plot(values_format='d', cmap='Blues', ax=ax)
-    plt.xticks(rotation=45)
+    plt.xticks(rotation=90)
 
 
 def plot_class_dist(data_dir):

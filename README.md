@@ -44,5 +44,29 @@ python3 train.py /path/to/config
 
 
 ![](data/examples/classes.png)
+
+
 ### Experimental results:
-....
+
+|              | Accuracy | Size    | Training time, Tesla K80 |
+|--------------|----------|---------|--------------------------|
+| **Resnet18** | 99.85    | 44.8 MB | 42 mins                  |
+| **Resnet50** | 97.72    | 9.2 MB  | 32 mins                  |
+
+**data**: imagewoof2-160
+
+**# classes**: 10, **batch size**: 32,  **# epochs**: 20
+
+**lr_scheduler.StepLR**:  (step_size=10, gamma=0.1)
+
+**Augmentations**: Resize(height=160, width=160), ShiftScaleRotate, HorizontalFlip, VerticalFlip, 
+CoarseDropout, GaussNoise, RGBShift, RandomBrightnessContrast
+
+<details>
+  <summary>example</summary>
+
+![](data/examples/aug_images.png)
+
+</details>
+
+

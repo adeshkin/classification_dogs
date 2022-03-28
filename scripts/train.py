@@ -132,7 +132,7 @@ class Trainer:
                 patience = self.params['patience']
                 best_acc = current_acc
                 best_model_wts = copy.deepcopy(self.model.state_dict())
-                print(f'\nSaved best model with val_accuracy = {round(current_acc, 3)}\n')
+                print(f'\nSaved best model\nValidation accuracy = {round(current_acc, 3)}\n')
                 torch.save(best_model_wts, f"{self.params['chkpt_dir']}/{config_name}_best.pth")
 
             patience -= 1
