@@ -1,5 +1,5 @@
-aiogram
-torch
-torchvision
-pillow
-numpy
+aiogram==2.19
+torch==1.11.0
+torchvision==0.12.0
+Pillow==9.0.1
+numpy==1.22.3
