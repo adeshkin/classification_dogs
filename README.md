@@ -125,16 +125,19 @@ CoarseDropout, GaussNoise, RGBShift, RandomBrightnessContrast
 
 ![](images/conf_resnet18.png)
 
-**According to confusion matrix, there are many mistakes between beagle and English_foxhound:**
+**According to confusion matrix there are many mistakes between beagle and English_foxhound:**
 
-|             beagle             |             English_foxhound             |
-|:------------------------------:|:----------------------------------------:|
-| ![](data/examples/beagle.JPEG) | ![](data/examples/English_foxhound.JPEG) |
+|                  beagle                  |             English_foxhound             |
+|:----------------------------------------:|:----------------------------------------:|
+|      ![](data/examples/beagle.JPEG)      | ![](data/examples/English_foxhound.JPEG) |
+|               beagle : 99%               | English_foxhound : 97% <br/>beagle : 2 % |
+*Here model distinguishes beagle and English_foxhound
 
 ### Conclusions:
-* Custom model with several conv layers are suitable here
 * Finetuning models is good baseline 
 * It is really difficult to classify such images (people with dogs, puppies, ...)
+* Custom model with several conv layers are not suitable here
+* According to per-class metrics we see that models can't distinguish beagle and English_foxhound in some cases 
 
 
 ### Future work:
