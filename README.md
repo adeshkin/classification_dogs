@@ -131,6 +131,7 @@ CoarseDropout, GaussNoise, RGBShift, RandomBrightnessContrast
 |:----------------------------------------:|:----------------------------------------:|
 |      ![](data/examples/beagle.JPEG)      | ![](data/examples/English_foxhound.JPEG) |
 |               beagle : 99%               | English_foxhound : 97% <br/>beagle : 2 % |
+
 *Here model distinguishes beagle and English_foxhound
 
 ### Conclusions:
