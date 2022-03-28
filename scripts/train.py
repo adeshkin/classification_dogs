@@ -112,11 +112,10 @@ class Trainer:
         wandb.init(project=self.params['project_name'], config=self.params)
         os.makedirs(self.params['chkpt_dir'], exist_ok=True)
         set_seed()
+        patience = self.params['patience']
+        self.model = self.model.to(self.device)
         best_model_wts = copy.deepcopy(self.model.state_dict())
         best_acc = 0.0
-        self.model = self.model.to(self.device)
-        patience = self.params['patience']
-        self.test()
         for epoch in range(1, self.params['num_epochs'] + 1):
             train_metrics = self.train(epoch)
             self.lr_scheduler.step()
