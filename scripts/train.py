@@ -115,7 +115,7 @@ class Trainer:
         best_model_wts = copy.deepcopy(self.model.state_dict())
         best_acc = 0.0
         self.model = self.model.to(self.device)
-        patience = 5
+        patience = self.params['patience']
         for epoch in range(1, self.params['num_epochs'] + 1):
             train_metrics = self.train(epoch)
             self.lr_scheduler.step()
@@ -129,7 +129,7 @@ class Trainer:
 
             current_acc = dev_metrics['accuracy']
             if current_acc > best_acc:
-                patience = 5
+                patience = self.params['patience']
                 best_acc = current_acc
                 best_model_wts = copy.deepcopy(self.model.state_dict())
                 print(f'\nSaved best model with val_accuracy = {round(current_acc, 3)}\n')
