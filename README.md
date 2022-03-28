@@ -132,11 +132,12 @@ CoarseDropout, GaussNoise, RGBShift, RandomBrightnessContrast
 | ![](data/examples/beagle.JPEG) | ![](data/examples/English_foxhound.JPEG) |
 
 ### Conclusions:
-* In general model has good quility
-* sdgf
-* 
-### Future work:
-* Аugmentations
-* Models
+* Custom model with several conv layers are suitable here
+* Finetuning models is good baseline 
+* It is really difficult to classify such images (people with dogs, puppies, ...)
 
+
+### Future work:
+* Experiments with different augmentations and sota models
+* Converting and optimizing pytorch models for mobile deployment
 
