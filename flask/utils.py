@@ -30,7 +30,7 @@ def prepare_img(img, img_size=(160, 160)):
 
 
 def get_model(model_name, num_classes):
-    model = torchvision.models.__dict__[model_name](pretrained=True)
+    model = torchvision.models.__dict__[model_name](pretrained=False)
     model.fc = nn.Linear(model.fc.in_features, num_classes)
     return model
 
