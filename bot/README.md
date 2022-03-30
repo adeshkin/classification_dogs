@@ -4,7 +4,8 @@
 
 **Instruction:**
 ```bash
-git clone https://github.com/adeshkin/classification_dogs
+git clone https://github.com/adeshkin/classification_dogs.git
+cd classification_dogs
 cp checkpoint/resnet18_best.pth bot
 cd bot
 heroku container:push --app class-dog web
