@@ -1,7 +1,14 @@
 ## Dog breed classification
 
 <details>
+  <summary>EDA</summary>
+
+* [Colab](https://colab.research.google.com/drive/1dZi19we1l71v7I2gcR8Kb4KS5wfEN-pU?usp=sharing)
+
+</details>
+<details>
   <summary>Training</summary>
+
 
 * [Colab](https://drive.google.com/file/d/1BD-nPsk95oHTn7JqiEb31xxwMNoUPGTs/view?usp=sharing)
 
