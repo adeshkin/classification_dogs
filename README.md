@@ -10,6 +10,7 @@
 <details>
   <summary>Pipeline</summary>
 <br />
+
 **Environment:**
 ```bash
 https://github.com/adeshkin/classification_dogs.git 
