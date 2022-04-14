@@ -8,10 +8,8 @@
 * [Telegram bot](bot/README.md)
 
 <details>
-  <summary>Training</summary>
-
-
-
+  <summary>Pipeline</summary>
+<br />
 **Environment:**
 ```bash
 https://github.com/adeshkin/classification_dogs.git 
