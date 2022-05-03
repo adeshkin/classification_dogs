@@ -1,9 +1,5 @@
 ## Dog breed classification
 
-* **EDA**[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1dZi19we1l71v7I2gcR8Kb4KS5wfEN-pU?usp=sharing)
-
-* **Training**[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/19t7Z1DF7v0_HXelcu3mFrwxC5pvRTR-2?usp=sharing)
-
 * [Flask app](flask/README.md)
 * [Telegram bot](bot/README.md)
 
