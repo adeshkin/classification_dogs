@@ -4,7 +4,8 @@
 * [Telegram bot](bot/README.md)
 
 <details>
-  <summary>Pipeline</summary>
+  <summary>Pipeline:</summary>
+
 <br />
 
 **Environment:**
